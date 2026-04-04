@@ -4,6 +4,10 @@
   "description": "Record system audio and save it as MP3.",
   "version": "1.0.0",
   "permissions": ["downloads"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
   "action": {
     "default_title": "Browser Sound to MP3",
     "default_popup": "popup.html"
