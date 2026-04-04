@@ -1,0 +1,60 @@
+:root {
+  color-scheme: light;
+  font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f5f7fb;
+  width: 360px;
+}
+
+.app {
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.note {
+  margin: 0 0 16px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #3f4c63;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-start {
+  background: #1a7f37;
+}
+
+.btn-stop {
+  background: #cc2936;
+}
+
+.status {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: #223;
+  white-space: pre-line;
+}

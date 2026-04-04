@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Browser Sound to MP3",
+  "description": "Record system audio and save it as MP3.",
+  "version": "1.0.0",
+  "permissions": ["downloads"],
+  "action": {
+    "default_title": "Browser Sound to MP3",
+    "default_popup": "popup.html"
+  }
+}
