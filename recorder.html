@@ -11,9 +11,15 @@
       <h1>録音ウィンドウ</h1>
       <p class="note">開始後はこのウィンドウを閉じないでください。フォーカスを他へ移しても録音は継続します。</p>
 
+      <label class="note" for="modeSelect">モード</label>
+      <select id="modeSelect" class="mode-select">
+        <option value="audio">音声のみ (MP3)</option>
+        <option value="capture">画面+音声 (WebM)</option>
+      </select>
+
       <div class="actions">
-        <button id="startButton" class="btn btn-start">録音開始</button>
-        <button id="stopButton" class="btn btn-stop" disabled>録音停止</button>
+        <button id="startButton" class="btn btn-start">開始</button>
+        <button id="stopButton" class="btn btn-stop" disabled>停止</button>
       </div>
 
       <p id="status" class="status" aria-live="polite">待機中</p>

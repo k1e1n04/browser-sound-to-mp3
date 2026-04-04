@@ -1,3 +1,14 @@
+function buildTimestamp(date = new Date()) {
+  const yyyy = String(date.getUTCFullYear());
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const hh = String(date.getUTCHours()).padStart(2, '0');
+  const min = String(date.getUTCMinutes()).padStart(2, '0');
+  const ss = String(date.getUTCSeconds()).padStart(2, '0');
+
+  return `${yyyy}-${mm}-${dd}-${hh}-${min}-${ss}`;
+}
+
 export function floatTo16BitPCM(float32Array) {
   const output = new Int16Array(float32Array.length);
 
@@ -10,12 +21,9 @@ export function floatTo16BitPCM(float32Array) {
 }
 
 export function buildRecordingFilename(date = new Date()) {
-  const yyyy = String(date.getUTCFullYear());
-  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(date.getUTCDate()).padStart(2, '0');
-  const hh = String(date.getUTCHours()).padStart(2, '0');
-  const min = String(date.getUTCMinutes()).padStart(2, '0');
-  const ss = String(date.getUTCSeconds()).padStart(2, '0');
+  return `recording-${buildTimestamp(date)}.mp3`;
+}
 
-  return `recording-${yyyy}-${mm}-${dd}-${hh}-${min}-${ss}.mp3`;
+export function buildCaptureFilename(date = new Date()) {
+  return `capture-${buildTimestamp(date)}.webm`;
 }

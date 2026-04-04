@@ -3,6 +3,12 @@
   "name": "Browser Sound to MP3",
   "description": "Record system audio and save it as MP3.",
   "version": "1.0.0",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["downloads"],
   "background": {
     "service_worker": "background.js",
@@ -10,6 +16,10 @@
   },
   "action": {
     "default_title": "Browser Sound to MP3",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    },
     "default_popup": "popup.html"
   }
 }

@@ -1,6 +1,11 @@
-import { buildRecordingFilename, floatTo16BitPCM } from './src/audio-utils.js';
-import { createAudioRecorder } from './src/recorder-utils.js';
+import {
+  buildCaptureFilename,
+  buildRecordingFilename,
+  floatTo16BitPCM,
+} from './src/audio-utils.js';
+import { createAudioRecorder, createDisplayRecorder } from './src/recorder-utils.js';
 
+const modeSelect = document.getElementById('modeSelect');
 const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
 const statusNode = document.getElementById('status');
@@ -9,14 +14,16 @@ let mediaRecorder = null;
 let capturedStream = null;
 let recorderStream = null;
 let chunks = [];
+let currentMode = 'audio';
 
 function setStatus(message) {
   statusNode.textContent = message;
 }
 
-function toggleButtons(isRecording) {
+function toggleControls(isRecording) {
   startButton.disabled = isRecording;
   stopButton.disabled = !isRecording;
+  modeSelect.disabled = isRecording;
 }
 
 function releaseStream() {
@@ -78,9 +85,8 @@ async function convertToMp3(webmBlob) {
   return new Blob(frames, { type: 'audio/mpeg' });
 }
 
-async function downloadMp3(mp3Blob) {
-  const url = URL.createObjectURL(mp3Blob);
-  const filename = buildRecordingFilename(new Date());
+async function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
 
   await chrome.downloads.download({
     url,
@@ -94,6 +100,8 @@ async function downloadMp3(mp3Blob) {
 async function startRecording() {
   try {
     chunks = [];
+    currentMode = modeSelect.value;
+
     capturedStream = await navigator.mediaDevices.getDisplayMedia({
       audio: {
         suppressLocalAudioPlayback: false,
@@ -101,9 +109,12 @@ async function startRecording() {
       video: true,
     });
 
-    const recorderBundle = createAudioRecorder(capturedStream);
+    const recorderBundle = currentMode === 'capture'
+      ? createDisplayRecorder(capturedStream)
+      : createAudioRecorder(capturedStream);
+
     mediaRecorder = recorderBundle.recorder;
-    recorderStream = recorderBundle.audioStream;
+    recorderStream = recorderBundle.audioStream || recorderBundle.displayStream;
 
     mediaRecorder.addEventListener('dataavailable', (event) => {
       if (event.data && event.data.size > 0) {
@@ -112,16 +123,21 @@ async function startRecording() {
     });
 
     mediaRecorder.addEventListener('stop', async () => {
-      toggleButtons(false);
+      toggleControls(false);
 
       try {
-        setStatus('MP3に変換中...');
-        const webmBlob = new Blob(chunks, { type: mediaRecorder?.mimeType || 'audio/webm' });
-        const mp3Blob = await convertToMp3(webmBlob);
-
-        setStatus('ダウンロード準備中...');
-        await downloadMp3(mp3Blob);
-        setStatus('完了: MP3を保存しました。');
+        if (currentMode === 'capture') {
+          setStatus('WebM保存中...');
+          const webmBlob = new Blob(chunks, { type: mediaRecorder?.mimeType || 'video/webm' });
+          await downloadBlob(webmBlob, buildCaptureFilename(new Date()));
+          setStatus('完了: WebMを保存しました。');
+        } else {
+          setStatus('MP3に変換中...');
+          const webmBlob = new Blob(chunks, { type: mediaRecorder?.mimeType || 'audio/webm' });
+          const mp3Blob = await convertToMp3(webmBlob);
+          await downloadBlob(mp3Blob, buildRecordingFilename(new Date()));
+          setStatus('完了: MP3を保存しました。');
+        }
       } catch (error) {
         setStatus(`失敗: ${error.message}`);
       } finally {
@@ -130,11 +146,13 @@ async function startRecording() {
     });
 
     mediaRecorder.start(250);
-    toggleButtons(true);
-    setStatus('録音中... 他のタブ/アプリを操作しても継続します。');
+    toggleControls(true);
+    setStatus(currentMode === 'capture'
+      ? 'キャプチャ中... 他のタブ/アプリを操作しても継続します。'
+      : '録音中... 他のタブ/アプリを操作しても継続します。');
   } catch (error) {
     releaseStream();
-    toggleButtons(false);
+    toggleControls(false);
     setStatus(`開始失敗: ${error.message}`);
   }
 }

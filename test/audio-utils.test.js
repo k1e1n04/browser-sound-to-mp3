@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildRecordingFilename, floatTo16BitPCM } from '../src/audio-utils.js';
+import {
+  buildCaptureFilename,
+  buildRecordingFilename,
+  floatTo16BitPCM,
+} from '../src/audio-utils.js';
 
 describe('floatTo16BitPCM', () => {
   it('clamps float samples and converts to signed 16-bit PCM', () => {
@@ -24,5 +28,14 @@ describe('buildRecordingFilename', () => {
     const filename = buildRecordingFilename(dt);
 
     expect(filename).toBe('recording-2026-04-04-12-34-56.mp3');
+  });
+});
+
+describe('buildCaptureFilename', () => {
+  it('creates deterministic webm filename from date', () => {
+    const dt = new Date('2026-04-05T12:34:56Z');
+    const filename = buildCaptureFilename(dt);
+
+    expect(filename).toBe('capture-2026-04-05-12-34-56.webm');
   });
 });

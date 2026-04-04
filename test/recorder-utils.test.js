@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createAudioRecorder, listSupportedRecorderOptions } from '../src/recorder-utils.js';
+import {
+  createAudioRecorder,
+  createDisplayRecorder,
+  listSupportedRecorderOptions,
+  listSupportedVideoRecorderOptions,
+} from '../src/recorder-utils.js';
 
 describe('listSupportedRecorderOptions', () => {
   it('returns only mime types supported by MediaRecorder', () => {
@@ -89,5 +94,64 @@ describe('createAudioRecorder', () => {
     expect(() => {
       createAudioRecorder(displayStream, FakeMediaRecorder, () => ({}));
     }).toThrow('音声トラックが取得できませんでした');
+  });
+});
+
+describe('listSupportedVideoRecorderOptions', () => {
+  it('returns only video-capable mime types supported by MediaRecorder', () => {
+    const FakeMediaRecorder = {
+      isTypeSupported: (mimeType) => mimeType === 'video/webm;codecs=vp8,opus',
+    };
+
+    const options = listSupportedVideoRecorderOptions(FakeMediaRecorder);
+    expect(options).toEqual([{ mimeType: 'video/webm;codecs=vp8,opus' }, undefined]);
+  });
+});
+
+describe('createDisplayRecorder', () => {
+  it('creates recorder from full display stream', () => {
+    const displayStream = { kind: 'display-stream' };
+
+    class FakeMediaRecorder {
+      constructor(stream, options) {
+        this.stream = stream;
+        this.options = options;
+      }
+
+      static isTypeSupported() {
+        return true;
+      }
+    }
+
+    const { recorder, displayStream: source } = createDisplayRecorder(displayStream, FakeMediaRecorder);
+    expect(source).toBe(displayStream);
+    expect(recorder.stream).toBe(displayStream);
+    expect(recorder.options).toEqual({ mimeType: 'video/webm;codecs=vp9,opus' });
+  });
+
+  it('falls back to default options if explicit mime types fail', () => {
+    const displayStream = { kind: 'display-stream' };
+    const triedOptions = [];
+
+    class FakeMediaRecorder {
+      constructor(_stream, options) {
+        triedOptions.push(options);
+        if (options && options.mimeType) {
+          throw new Error('unsupported');
+        }
+      }
+
+      static isTypeSupported() {
+        return true;
+      }
+    }
+
+    createDisplayRecorder(displayStream, FakeMediaRecorder);
+    expect(triedOptions).toEqual([
+      { mimeType: 'video/webm;codecs=vp9,opus' },
+      { mimeType: 'video/webm;codecs=vp8,opus' },
+      { mimeType: 'video/webm' },
+      undefined,
+    ]);
   });
 });
